@@ -1,0 +1,182 @@
+--Que-02
+--create table employees1(
+--	employee_id INT,
+--	team_id INT
+----	emp_id INT,
+----	name VARCHAR(100),
+----	dept VARCHAR(50),
+----	salary numeric(100, 2)
+--);
+--
+--insert into employees1(employee_id, team_id)
+--values (1,8),
+--(2,8),
+--(3,8),
+--(4,7),
+--(5,9),
+--(6,9);
+--
+--
+--select employee_id, count(team_id) over(partition by team_id) as team_size
+--from employees1
+--order by employee_id;
+--
+
+
+
+--que 03
+--create table DailySales(
+--	date_id date,
+--	make_name VARCHAR(50),
+--	lead_id INT,
+--	partner_id INT
+--);
+--
+--insert into DailySales(date_id, make_name, lead_id, partner_id)
+--values ('2020-12-8', 'toyota', 0, 1),
+--('2020-12-8', 'toyota', 1, 0),
+--('2020-12-8', 'toyota', 1, 2),
+--('2020-12-7', 'toyota', 0, 2),
+--('2020-12-7', 'toyota', 0, 1),
+--('2020-12-8', 'honda', 1, 2),
+--('2020-12-8', 'honda', 2, 1),
+--('2020-12-7', 'honda', 0, 1),
+--('2020-12-7', 'honda', 1, 2),
+--('2020-12-7', 'honda', 2, 1);
+--
+--
+--select date_id, make_name, count(distinct lead_id) as unique_leads,
+--count(distinct partner_id) as unique_partners
+--from DailySales
+--group by date_id, make_name;
+
+
+
+--que 04
+--create table Salaries(
+--	company_id INT,
+--	employee_id INT,
+--	employee_name VARCHAR(100),
+--	salary INT
+--);
+--
+--insert into Salaries(company_id, employee_id, employee_name, salary)
+--values 
+--(1, 1, 'Tony', 2000),
+--(1, 2, 'Pronub', 21300),
+--(1, 3, 'Tyrrox', 10800),
+--(2, 1, 'Pam', 300),
+--(2, 7, 'Bassem', 450),
+--(2, 9, 'Hermione', 700),
+--(3, 7, 'Bocaben', 100),
+--(3, 2, 'ognjen', 2200),
+--(3, 13, 'Nyancat', 3300),
+--(3, 15, 'Morninngcat', 7777);
+--
+--
+--with cte1 as 
+--(select company_id, employee_id, 
+--employee_name, salary, max(salary) over(partition by company_id) as max_salary,
+--case	
+--	when max(salary) over(partition by company_id)<=1000 then 0
+--	when max(salary) over(partition by company_id)>1000 and max(salary) over(partition by company_id)<=10000 then 24
+--	else 49
+--end as tax_percentage
+--from Salaries)
+--select company_id, employee_id, employee_name, 
+--salary-((tax_percentage*salary)/100) as salary
+--from cte1;
+
+
+
+--que 01
+--create table Warehouse( 
+--	name VARCHAR(100),
+--	product_id INT,
+--	units INT
+--);
+--
+--insert into Warehouse(name, product_id, units)
+--values
+--('LCH1', 1, 1),
+--('LCH1', 2, 10),
+--('LCH1', 3, 5),
+--('LCH2', 1, 2),
+--('LCH2', 2, 2),
+--('LCH3', 4, 1);
+--
+--create table Products1( 
+--	product_id INT,
+--	product_name VARCHAR(100),
+--	Width INT, 
+--	Length INT,
+--	Height INT
+--);
+--
+--insert into Products1(product_id, product_name, Width, Length, Height)
+--values
+--(1, 'LC-TV', 5, 50, 40),
+--(2, 'LC-KeyChain', 5, 5, 5),
+--(3, 'LC-Phone', 2, 10, 10),
+--(4, 'LC-T-shirt', 4, 10, 20);
+--
+--
+
+--1st method
+--with cte1 as (select product_id, (Width*Length*Height) as new
+--from Products1),
+--
+--cte2 as (select w.name, (units*new) as sum_new
+--from Warehouse as w
+--join cte1 as c
+--on w.product_id=c.product_id)
+--
+--select distinct name, sum(sum_new) over (partition by name) as volume
+--from cte2;
+
+
+--2nd method
+--select name, sum(w.units*p.Width*p.Length*p.Height)
+--from warehouse w
+--join products1 p 
+--on w.product_id=p.product_id 
+--group by name;
+
+
+
+--que 05
+--CREATE TABLE Employee10 (
+--    ord_no INT PRIMARY KEY,
+--    purch_amt DECIMAL(10,2),
+--    ord_date DATE,
+--    customer_id INT,
+--    salesman_id INT
+--);
+--
+--INSERT INTO Employee10 (ord_no, purch_amt, ord_date, customer_id, salesman_id) VALUES
+--(70001, 150.50, '2012-10-05', 3005, 5002),
+--(70009, 270.65, '2012-09-10', 3001, 5005),
+--(70002, 65.26, '2012-10-05', 3002, 5001),
+--(70004, 110.50, '2012-08-17', 3009, 5003),
+--(70007, 948.50, '2012-09-10', 3005, 5002),
+--(70005, 2400.60, '2012-07-27', 3007, 5001),
+--(70008, 2760.00, '2012-09-10', 3002, 5001),
+--(70010, 1983.43, '2012-10-10', 3004, 5006),
+--(70003, 2480.40, '2012-10-10', 3009, 5003),
+--(70012, 250.45, '2012-06-27', 3008, 5002),
+--(70011, 75.29, '2012-08-17', 3003, 5007),
+--(70013, 3045.60, '2012-04-25', 3002, 5001);
+--
+--
+--select * from Employee10;
+--
+--
+--
+--with cte1 as (select ord_no, purch_amt, ord_date, customer_id, salesman_id, 
+--						sum(purch_amt) over(partition by salesman_id) as new_sum
+--from Employee10)
+--select ord_no, purch_amt, ord_date, customer_id, salesman_id, round((purch_amt/2000)*100, 1) as percentage_amt
+--from cte1
+--where new_sum>1000;
+
+
